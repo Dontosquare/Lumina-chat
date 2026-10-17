@@ -441,13 +441,13 @@ export function applySuggestion(db, s) {
     const list = s.target.kind === 'goal' ? db.goals : db.budgets;
     const field = s.target.kind === 'goal' ? 'monthlyContribution' : 'monthly';
     const item = list.find((x) => x.id === s.target.id);
-    if (!item || item[field] < s.amount) throw new Error(`${s.target.label} har ændret sig siden forslaget. Spørg rådgiveren igen.`);
+    if (!item || item[field] < s.amount) throw new Error(`${s.target.label} har ændret sig siden forslaget. Spørg budgethjælperen igen.`);
     item[field] -= s.amount;
     return;
   }
   if (s.type === 'extend_deadline') {
     const goal = db.goals.find((g) => g.id === s.target.id);
-    if (!goal) throw new Error('Det mål findes ikke længere. Spørg rådgiveren igen.');
+    if (!goal) throw new Error('Det mål findes ikke længere. Spørg budgethjælperen igen.');
     goal.deadline = s.deadline;
     return;
   }
@@ -456,15 +456,15 @@ export function applySuggestion(db, s) {
   for (const m of s.moves) {
     if (m.kind !== 'budget') continue;
     const b = budgets.find((x) => x.id === m.id);
-    if (!b || b.monthly < m.amount) throw new Error(`${m.label} har ikke længere ${fmt(m.amount)} at flytte. Spørg rådgiveren igen.`);
+    if (!b || b.monthly < m.amount) throw new Error(`${m.label} har ikke længere ${fmt(m.amount)} at flytte. Spørg budgethjælperen igen.`);
     b.monthly -= m.amount;
   }
   const goals = db.goals.map((g) => ({ ...g }));
   const target = (s.target.kind === 'goal' ? goals : budgets).find((x) => x.id === s.target.id);
-  if (!target) throw new Error(`${s.target.label} findes ikke længere. Spørg rådgiveren igen.`);
+  if (!target) throw new Error(`${s.target.label} findes ikke længere. Spørg budgethjælperen igen.`);
   if (s.target.kind === 'goal') target.monthlyContribution += s.amount;
   else target.monthly += s.amount;
-  if (unallocated({ ...db, budgets, goals }) < 0) throw new Error('Der er ikke nok ufordelt indkomst tilbage til dette forslag. Spørg rådgiveren igen.');
+  if (unallocated({ ...db, budgets, goals }) < 0) throw new Error('Der er ikke nok ufordelt indkomst tilbage til dette forslag. Spørg budgethjælperen igen.');
   db.budgets = budgets;
   db.goals = goals;
 }

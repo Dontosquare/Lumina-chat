@@ -62,7 +62,7 @@ function toggle(id) {
   <section class="panel agent">
     <header class="panel-head">
       <div>
-        <h2><span class="orb orb-sm" :class="{ pulse: thinking }"></span> Budget rådgiver</h2>
+        <h2><span class="orb orb-sm" :class="{ pulse: thinking }"></span> Budgethjælper</h2>
         <p class="muted">Fortæl den, hvad der betyder noget for dig. Den læser dit forbrug og dine mål og foreslår ændringer. Intet ændres, før du accepterer.</p>
       </div>
     </header>
@@ -90,7 +90,7 @@ function toggle(id) {
       </select>
 
       <button class="primary" :disabled="store.busy || thinking" @click="runAgent">
-        {{ thinking ? 'Tænker…' : run ? 'Kør igen' : 'Spørg rådgiveren' }}
+        {{ thinking ? 'Tænker…' : run ? 'Kør igen' : 'Spørg budgethjælperen' }}
       </button>
     </div>
 
@@ -102,7 +102,7 @@ function toggle(id) {
           <span>{{ s.summary }}</span>
         </p>
       </li>
-      <li v-if="thinking" class="typing" aria-label="Rådgiveren tænker"><span></span><span></span><span></span></li>
+      <li v-if="thinking" class="typing" aria-label="Budgethjælperen tænker"><span></span><span></span><span></span></li>
     </ol>
 
     <div v-if="run && !thinking" class="suggestions">
@@ -147,7 +147,7 @@ function toggle(id) {
     </div>
 
     <div v-if="!run" class="empty">
-      <p>Rådgiveren har ikke kigget på din økonomi endnu.</p>
+      <p>Budgethjælperen har ikke kigget på din økonomi endnu.</p>
       <p class="muted">Vælg en hensigt og spørg den. Du kan se hvert skridt, den tager.</p>
     </div>
   </section>

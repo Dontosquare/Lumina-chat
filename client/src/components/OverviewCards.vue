@@ -43,7 +43,7 @@ async function saveIncome() {
     <div class="stat" :class="{ highlight: store.data.unallocated > 0, negative: store.data.unallocated < 0 }">
       <span class="label">{{ store.data.unallocated < 0 ? 'Underskud' : 'Ufordelt' }}</span>
       <span class="stat-value">{{ money(store.data.unallocated) }}</span>
-      <span class="hint">{{ store.data.unallocated < 0 ? 'Du har planlagt mere, end du tjener. Spørg rådgiveren' : 'Penge uden en opgave endnu' }}</span>
+      <span class="hint">{{ store.data.unallocated < 0 ? 'Du har planlagt mere, end du tjener. Spørg budgethjælperen' : 'Penge uden en opgave endnu' }}</span>
     </div>
   </section>
 </template>

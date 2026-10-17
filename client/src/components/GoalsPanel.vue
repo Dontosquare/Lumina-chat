@@ -63,7 +63,7 @@ const pct = (g) => Math.min(100, Math.round((g.saved / g.target) * 100));
           <button class="link danger" @click="act(api.deleteGoal(g.id))">Fjern</button>
         </footer>
       </article>
-      <p v-if="!store.data.goals.length" class="muted">Ingen mål endnu. Tilføj et, så rådgiveren ved, hvad du sigter efter.</p>
+      <p v-if="!store.data.goals.length" class="muted">Ingen mål endnu. Tilføj et, så budgethjælperen ved, hvad du sigter efter.</p>
     </div>
   </section>
 </template>

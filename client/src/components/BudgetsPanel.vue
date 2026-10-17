@@ -19,8 +19,8 @@ const ABOUT = {
   travel: 'Ferier, weekendture, fly, tog og hotel. Det kan betale sig at spare lidt op hver måned i stedet for at betale det hele på én gang.',
 };
 const KIND_ABOUT = {
-  essential: 'Nødvendig udgift: rådgiveren skærer aldrig her under det, du faktisk bruger.',
-  discretionary: 'Valgfri udgift: her kan rådgiveren foreslå, at du bruger mindre.',
+  essential: 'Nødvendig udgift: budgethjælperen skærer aldrig her under det, du faktisk bruger.',
+  discretionary: 'Valgfri udgift: her kan budgethjælperen foreslå, at du bruger mindre.',
 };
 // Shown with pure CSS on hover or keyboard focus (tap on phones), so no state is needed here.
 
