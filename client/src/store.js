@@ -2,7 +2,8 @@
 // so `act()` just swaps it in. Components read `store.data` and call `act(api.x(...))`.
 import { reactive } from 'vue';
 
-export const store = reactive({ data: null, error: '', busy: false });
+// flash: ids of budgets the rådgiver just changed, so the Budgetter panel can highlight them.
+export const store = reactive({ data: null, error: '', busy: false, flash: new Set() });
 
 export async function act(promise) {
   store.busy = true;
@@ -22,12 +23,12 @@ const currency = new Intl.NumberFormat('da-DK', { style: 'currency', currency: '
 export const money = (n) => currency.format(Math.round(n));
 
 export const month = (ym) => {
-  if (!ym) return 'never';
+  if (!ym) return 'aldrig';
   const [y, m] = ym.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleString('en-US', { month: 'short', year: 'numeric' });
+  return new Date(y, m - 1, 1).toLocaleString('da-DK', { month: 'short', year: 'numeric' });
 };
 
 export const day = (iso) => {
   const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleString('en-US', { month: 'short', day: 'numeric' });
+  return new Date(y, m - 1, d).toLocaleString('da-DK', { month: 'short', day: 'numeric' });
 };

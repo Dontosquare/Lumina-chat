@@ -5,19 +5,23 @@ async function request(method, url, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  if (!res.ok) throw new Error(data.error || `Forespørgslen mislykkedes (${res.status})`);
   return data;
 }
 
 export const api = {
   state: () => request('GET', '/api/state'),
   setIncome: (income) => request('PATCH', '/api/income', { income }),
+  setBudget: (id, monthly) => request('PATCH', `/api/budgets/${id}`, { monthly }),
   addTransaction: (t) => request('POST', '/api/transactions', t),
   deleteTransaction: (id) => request('DELETE', `/api/transactions/${id}`),
   addGoal: (g) => request('POST', '/api/goals', g),
   deleteGoal: (id) => request('DELETE', `/api/goals/${id}`),
   runAgent: (intent) => request('POST', '/api/agent/run', intent),
+  chat: (text) => request('POST', '/api/chat', { text }),
+  undoChat: (id) => request('POST', `/api/chat/${id}/undo`),
   apply: (id) => request('POST', `/api/agent/suggestions/${id}/apply`),
   dismiss: (id) => request('POST', `/api/agent/suggestions/${id}/dismiss`),
   reset: () => request('POST', '/api/reset'),
+  clear: () => request('POST', '/api/clear'),
 };

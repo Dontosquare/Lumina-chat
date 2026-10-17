@@ -14,7 +14,7 @@ export const roundDown = (x, step = MONEY_STEP) => Math.max(0, Math.floor(x / st
 export const roundUp = (x, step = MONEY_STEP) => Math.ceil(x / step) * step;
 export const fmt = (n) => currency.format(Math.round(n));
 export const fmtMonth = (ym) =>
-  ym ? parseDate(ym).toLocaleString('en-US', { month: 'short', year: 'numeric' }) : 'never';
+  ym ? parseDate(ym).toLocaleString('da-DK', { month: 'short', year: 'numeric' }) : 'aldrig';
 
 export function monthsUntil(dateStr, now) {
   const d = parseDate(dateStr);

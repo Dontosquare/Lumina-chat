@@ -16,9 +16,9 @@ const thinking = computed(() => visible.value < steps.value.length);
 const pending = computed(() => run.value?.suggestions.filter((s) => s.status === 'pending').length ?? 0);
 
 const MODE_HINTS = {
-  balanced: 'Use most of the slack, small trims',
-  saver: 'Move everything spare, trim wants',
-  lifestyle: 'Only move money you clearly don\'t use',
+  balanced: 'Bruger det meste af luften i budgettet og skærer lidt ned',
+  saver: 'Flytter alt overskud og skærer i det, der ikke er nødvendigt',
+  lifestyle: 'Flytter kun penge, du tydeligvis ikke bruger',
 };
 
 // Replay the agent's steps one by one so you can watch it reason.
@@ -44,6 +44,13 @@ function runAgent() {
   act(api.runAgent({ mode: mode.value, focusGoalId: focusGoalId.value || null }));
 }
 
+function badge(s) {
+  if (s.type === 'advice') return { text: 'Råd', tone: 'warn' };
+  if (s.type === 'extend_deadline') return { text: 'Gentænk mål', tone: 'neutral' };
+  if (s.type === 'reduce') return s.target.kind === 'goal' ? { text: 'Mindre opsparing', tone: 'neutral' } : { text: 'Skær ned', tone: 'accent' };
+  return s.target.kind === 'goal' ? { text: 'Finansiér mål', tone: 'accent' } : { text: 'Ret budget', tone: 'accent' };
+}
+
 function toggle(id) {
   const next = new Set(expanded.value);
   next.has(id) ? next.delete(id) : next.add(id);
@@ -55,14 +62,14 @@ function toggle(id) {
   <section class="panel agent">
     <header class="panel-head">
       <div>
-        <h2><span class="orb small" :class="{ pulse: thinking }"></span> Budget agent</h2>
-        <p class="muted">Tell it what matters. It reads your spending and goals, then proposes moves. Nothing changes until you accept.</p>
+        <h2><span class="orb orb-sm" :class="{ pulse: thinking }"></span> Budget rådgiver</h2>
+        <p class="muted">Fortæl den, hvad der betyder noget for dig. Den læser dit forbrug og dine mål og foreslår ændringer. Intet ændres, før du accepterer.</p>
       </div>
     </header>
 
     <div class="intent">
-      <span class="label">Your intent</span>
-      <div class="chips" role="radiogroup" aria-label="Intent">
+      <span class="label">Din hensigt</span>
+      <div class="chips" role="radiogroup" aria-label="Hensigt">
         <button
           v-for="(label, key) in store.data.modes"
           :key="key"
@@ -76,14 +83,14 @@ function toggle(id) {
       </div>
       <p class="hint">{{ MODE_HINTS[mode] }}</p>
 
-      <label class="label" for="focus">Focus on a goal</label>
+      <label class="label" for="focus">Fokusér på et mål</label>
       <select id="focus" v-model="focusGoalId">
-        <option value="">Use my priorities</option>
+        <option value="">Brug mine prioriteter</option>
         <option v-for="g in store.data.goals" :key="g.id" :value="g.id">{{ g.name }}</option>
       </select>
 
       <button class="primary" :disabled="store.busy || thinking" @click="runAgent">
-        {{ thinking ? 'Thinking…' : run ? 'Run again' : 'Ask the agent' }}
+        {{ thinking ? 'Tænker…' : run ? 'Kør igen' : 'Spørg rådgiveren' }}
       </button>
     </div>
 
@@ -95,22 +102,20 @@ function toggle(id) {
           <span>{{ s.summary }}</span>
         </p>
       </li>
-      <li v-if="thinking" class="typing" aria-label="Agent is thinking"><span></span><span></span><span></span></li>
+      <li v-if="thinking" class="typing" aria-label="Rådgiveren tænker"><span></span><span></span><span></span></li>
     </ol>
 
     <div v-if="run && !thinking" class="suggestions">
       <h3>
-        Suggestions
-        <span class="muted">{{ pending ? `${pending} waiting for you` : 'all reviewed' }}</span>
+        Forslag
+        <span class="muted">{{ pending ? `${pending} venter på dig` : 'alle gennemgået' }}</span>
       </h3>
-      <p v-if="!run.suggestions.length" class="muted">No changes needed right now.</p>
+      <p v-if="!run.suggestions.length" class="muted">{{ run.emptyText || 'Der er ikke brug for ændringer lige nu.' }}</p>
 
       <article v-for="s in run.suggestions" :key="s.id" :class="['suggestion', s.status]">
         <div class="suggestion-top">
-          <span :class="['badge', s.type === 'extend_deadline' ? 'neutral' : 'accent']">
-            {{ s.type === 'extend_deadline' ? 'Rethink goal' : s.target.kind === 'goal' ? 'Fund goal' : 'Fix budget' }}
-          </span>
-          <span v-if="s.confidence === 'medium'" class="badge warn" title="Needs a small change in spending habits">needs a habit change</span>
+          <span :class="['badge', badge(s).tone]">{{ badge(s).text }}</span>
+          <span v-if="s.confidence === 'medium'" class="badge warn" title="Kræver en lille ændring i dine vaner">kræver nye vaner</span>
         </div>
         <h4>{{ s.title }}</h4>
         <p class="impact">→ {{ s.impact }}</p>
@@ -121,20 +126,29 @@ function toggle(id) {
           </li>
         </ul>
 
-        <button class="link" @click="toggle(s.id)">{{ expanded.has(s.id) ? 'Hide reasoning' : 'Why?' }}</button>
-        <p v-if="expanded.has(s.id)" class="rationale">{{ s.rationale }}</p>
+        <template v-if="s.type === 'advice'">
+          <p class="rationale">{{ s.rationale }}</p>
+          <div v-if="s.status === 'pending'" class="actions">
+            <button class="primary small" :disabled="store.busy" @click="act(api.dismiss(s.id))">Forstået</button>
+          </div>
+          <p v-else class="status">✓ Forstået</p>
+        </template>
+        <template v-else>
+          <button class="link" @click="toggle(s.id)">{{ expanded.has(s.id) ? 'Skjul begrundelse' : 'Hvorfor?' }}</button>
+          <p v-if="expanded.has(s.id)" class="rationale">{{ s.rationale }}</p>
 
-        <div v-if="s.status === 'pending'" class="actions">
-          <button class="primary small" :disabled="store.busy" @click="act(api.apply(s.id))">Accept</button>
-          <button class="ghost small" :disabled="store.busy" @click="act(api.dismiss(s.id))">Dismiss</button>
-        </div>
-        <p v-else class="status">{{ s.status === 'applied' ? '✓ Applied' : 'Dismissed' }}</p>
+          <div v-if="s.status === 'pending'" class="actions">
+            <button class="primary small" :disabled="store.busy" @click="act(api.apply(s.id))">Acceptér</button>
+            <button class="ghost small" :disabled="store.busy" @click="act(api.dismiss(s.id))">Afvis</button>
+          </div>
+          <p v-else class="status">{{ s.status === 'applied' ? '✓ Accepteret' : 'Afvist' }}</p>
+        </template>
       </article>
     </div>
 
     <div v-if="!run" class="empty">
-      <p>The agent hasn't looked at your money yet.</p>
-      <p class="muted">Pick an intent and ask it. You'll see every step it takes.</p>
+      <p>Rådgiveren har ikke kigget på din økonomi endnu.</p>
+      <p class="muted">Vælg en hensigt og spørg den. Du kan se hvert skridt, den tager.</p>
     </div>
   </section>
 </template>

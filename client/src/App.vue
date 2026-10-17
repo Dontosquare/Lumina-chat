@@ -4,11 +4,24 @@ import { store, act } from './store.js';
 import { api } from './api.js';
 import OverviewCards from './components/OverviewCards.vue';
 import AgentPanel from './components/AgentPanel.vue';
+import ChatPanel from './components/ChatPanel.vue';
 import GoalsPanel from './components/GoalsPanel.vue';
 import BudgetsPanel from './components/BudgetsPanel.vue';
 import TransactionsPanel from './components/TransactionsPanel.vue';
 
-const confirmReset = ref(false);
+// Both destructive header buttons need a second click within 3 seconds.
+const confirming = ref(null); // 'reset' | 'clear' | null
+let confirmTimer;
+async function confirmThen(kind, call) {
+  if (confirming.value !== kind) {
+    confirming.value = kind;
+    clearTimeout(confirmTimer);
+    confirmTimer = setTimeout(() => (confirming.value = null), 3000);
+    return;
+  }
+  confirming.value = null;
+  await act(call());
+}
 
 // Light is the default; the choice is remembered in this browser.
 const readTheme = () => {
@@ -21,16 +34,6 @@ watchEffect(() => {
 });
 
 onMounted(() => act(api.state()));
-
-async function reset() {
-  if (!confirmReset.value) {
-    confirmReset.value = true;
-    setTimeout(() => (confirmReset.value = false), 3000);
-    return;
-  }
-  confirmReset.value = false;
-  await act(api.reset());
-}
 </script>
 
 <template>
@@ -39,15 +42,23 @@ async function reset() {
       <span class="orb" aria-hidden="true"></span>
       <div>
         <strong>Lumina</strong>
-        <span class="muted">Wealth that follows your goals</span>
+        <span class="muted">Økonomi, der følger dine mål</span>
       </div>
     </div>
     <div class="header-actions">
-      <button class="ghost" :aria-label="`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`" @click="theme = theme === 'light' ? 'dark' : 'light'">
-        {{ theme === 'light' ? '☾ Dark' : '☀ Light' }}
+      <button class="ghost" :aria-label="theme === 'light' ? 'Skift til mørk tilstand' : 'Skift til lys tilstand'" @click="theme = theme === 'light' ? 'dark' : 'light'">
+        {{ theme === 'light' ? '☾ Mørk' : '☀ Lys' }}
       </button>
-      <button class="ghost" :class="{ danger: confirmReset }" @click="reset">
-        {{ confirmReset ? 'Click again to reset' : 'Reset demo data' }}
+      <button
+        class="ghost"
+        :class="{ danger: confirming === 'clear' }"
+        title="Sæt indkomst og alle budgetter til 0 og fjern mål og posteringer"
+        @click="confirmThen('clear', api.clear)"
+      >
+        {{ confirming === 'clear' ? 'Klik igen for at rydde alt' : 'Ryd alt' }}
+      </button>
+      <button class="ghost" :class="{ danger: confirming === 'reset' }" @click="confirmThen('reset', api.reset)">
+        {{ confirming === 'reset' ? 'Klik igen for at nulstille' : 'Nulstil demodata' }}
       </button>
     </div>
   </header>
@@ -63,9 +74,10 @@ async function reset() {
         <TransactionsPanel />
       </div>
       <aside class="col agent-col">
+        <ChatPanel />
         <AgentPanel />
       </aside>
     </div>
   </main>
-  <p v-else-if="!store.error" class="page muted">Loading…</p>
+  <p v-else-if="!store.error" class="page muted">Indlæser…</p>
 </template>

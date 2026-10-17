@@ -11,28 +11,28 @@ function rng(seed) {
 }
 
 const BUDGETS = [
-  { id: 'housing', name: 'Housing', monthly: 10000, kind: 'essential' },
-  { id: 'groceries', name: 'Groceries', monthly: 3600, kind: 'essential' },
-  { id: 'utilities', name: 'Utilities', monthly: 1400, kind: 'essential' },
+  { id: 'housing', name: 'Bolig', monthly: 10000, kind: 'essential' },
+  { id: 'groceries', name: 'Dagligvarer', monthly: 3600, kind: 'essential' },
+  { id: 'utilities', name: 'Forsyning', monthly: 1400, kind: 'essential' },
   { id: 'transport', name: 'Transport', monthly: 1800, kind: 'essential' },
-  { id: 'dining', name: 'Dining out', monthly: 2600, kind: 'discretionary' },
+  { id: 'dining', name: 'Restaurant og café', monthly: 2600, kind: 'discretionary' },
   { id: 'shopping', name: 'Shopping', monthly: 2000, kind: 'discretionary' },
-  { id: 'entertainment', name: 'Entertainment', monthly: 1200, kind: 'discretionary' },
-  { id: 'subscriptions', name: 'Subscriptions', monthly: 650, kind: 'discretionary' },
-  { id: 'travel', name: 'Travel', monthly: 1000, kind: 'discretionary' },
+  { id: 'entertainment', name: 'Underholdning', monthly: 1200, kind: 'discretionary' },
+  { id: 'subscriptions', name: 'Abonnementer', monthly: 650, kind: 'discretionary' },
+  { id: 'travel', name: 'Rejser', monthly: 1000, kind: 'discretionary' },
 ];
 
 // How the demo user actually behaves: share of each budget really spent per month.
 const PATTERNS = {
-  housing: { ratio: 1, count: 1, notes: ['Rent'] },
-  groceries: { ratio: 1.1, count: 7, notes: ['Supermarket', 'Farmers market', 'Bulk store', 'Corner shop'] },
-  utilities: { ratio: 0.92, count: 3, notes: ['Electricity', 'Internet', 'Water'] },
-  transport: { ratio: 0.8, count: 5, notes: ['Transit pass', 'Fuel', 'Rideshare'] },
-  dining: { ratio: 0.58, count: 6, notes: ['Ramen bar', 'Coffee', 'Pizza night', 'Sushi', 'Brunch'] },
-  shopping: { ratio: 0.86, count: 4, notes: ['Clothing', 'Home goods', 'Electronics', 'Books'] },
-  entertainment: { ratio: 0.5, count: 3, notes: ['Cinema', 'Concert', 'Bowling'] },
-  subscriptions: { ratio: 1, count: 3, notes: ['Streaming', 'Music', 'Cloud storage'] },
-  travel: { ratio: 0.2, count: 1, notes: ['Weekend train trip', 'Hotel night'] },
+  housing: { ratio: 1, count: 1, notes: ['Husleje'] },
+  groceries: { ratio: 1.1, count: 7, notes: ['Supermarked', 'Torvehal', 'Grossist', 'Kiosk'] },
+  utilities: { ratio: 0.92, count: 3, notes: ['El', 'Internet', 'Vand'] },
+  transport: { ratio: 0.8, count: 5, notes: ['Rejsekort', 'Benzin', 'Taxa'] },
+  dining: { ratio: 0.58, count: 6, notes: ['Ramenbar', 'Kaffe', 'Pizzaaften', 'Sushi', 'Brunch'] },
+  shopping: { ratio: 0.86, count: 4, notes: ['Tøj', 'Boligudstyr', 'Elektronik', 'Bøger'] },
+  entertainment: { ratio: 0.5, count: 3, notes: ['Biograf', 'Koncert', 'Bowling'] },
+  subscriptions: { ratio: 1, count: 3, notes: ['Streaming', 'Musik', 'Cloudlager'] },
+  travel: { ratio: 0.2, count: 1, notes: ['Weekendtur med tog', 'Hotelovernatning'] },
 };
 
 const inMonths = (now, n) => toISODate(new Date(now.getFullYear(), now.getMonth() + n, Math.min(now.getDate(), 28)));
@@ -68,9 +68,9 @@ export function createSeed(now = new Date()) {
     income: 32000,
     budgets: BUDGETS.map((b) => ({ ...b })),
     goals: [
-      { id: 'g1', name: 'Emergency fund', target: 70000, saved: 43000, deadline: inMonths(now, 8), priority: 1, monthlyContribution: 2000 },
-      { id: 'g2', name: 'Japan trip', target: 25000, saved: 9500, deadline: inMonths(now, 6), priority: 2, monthlyContribution: 1000 },
-      { id: 'g3', name: 'House down payment', target: 280000, saved: 60000, deadline: inMonths(now, 50), priority: 3, monthlyContribution: 2800 },
+      { id: 'g1', name: 'Nødopsparing', target: 70000, saved: 43000, deadline: inMonths(now, 8), priority: 1, monthlyContribution: 2000 },
+      { id: 'g2', name: 'Rejse til Japan', target: 25000, saved: 9500, deadline: inMonths(now, 6), priority: 2, monthlyContribution: 1000 },
+      { id: 'g3', name: 'Udbetaling til bolig', target: 280000, saved: 60000, deadline: inMonths(now, 50), priority: 3, monthlyContribution: 2800 },
     ],
     transactions,
     lastRun: null,
