@@ -42,7 +42,9 @@ export async function load() {
   if (db) return db;
   if (existsSync(DB_PATH)) {
     db = JSON.parse(await readFile(DB_PATH, 'utf8'));
-    if (translateOldNames(db)) await save();
+    const hadChat = 'chat' in db; // leftover from the removed chat feature
+    delete db.chat;
+    if (translateOldNames(db) || hadChat) await save();
   } else {
     db = createSeed();
     await save();

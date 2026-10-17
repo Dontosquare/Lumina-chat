@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 import { load, save, reset, clear } from './store.js';
 import { snapshot, toISODate } from './finance.js';
 import { runAgent, applySuggestion, MODES } from './agent.js';
-import { handleMessage, undoMessage } from './chat.js';
 
 const app = express();
 app.use(express.json());
@@ -20,7 +19,6 @@ async function state() {
     ...snapshot(db),
     transactions: db.transactions.slice(0, 40),
     lastRun: db.lastRun,
-    chat: db.chat ?? [],
     modes: Object.fromEntries(Object.entries(MODES).map(([k, v]) => [k, v.label])),
   };
 }
@@ -93,26 +91,6 @@ app.delete('/api/goals/:id', wrap(async (req, res) => {
 app.post('/api/agent/run', wrap(async (req, res) => {
   const db = await load();
   db.lastRun = runAgent(db, req.body);
-  await save();
-  res.json(await state());
-}));
-
-app.post('/api/chat', wrap(async (req, res) => {
-  const text = String(req.body.text || '').trim().slice(0, 300);
-  if (!text) throw fail(400, 'Skriv en besked til rådgiveren');
-  const db = await load();
-  handleMessage(db, text);
-  await save();
-  res.json(await state());
-}));
-
-app.post('/api/chat/:id/undo', wrap(async (req, res) => {
-  const db = await load();
-  try {
-    undoMessage(db, req.params.id);
-  } catch (err) {
-    throw fail(409, err.message);
-  }
   await save();
   res.json(await state());
 }));

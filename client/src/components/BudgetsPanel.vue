@@ -100,7 +100,7 @@ async function save(c) {
       </p>
     </header>
     <ul class="budgets">
-      <li v-for="c in store.data.categories" :key="c.id" :class="['budget', { flash: store.flash.has(c.id) }]">
+      <li v-for="c in store.data.categories" :key="c.id" class="budget">
         <div class="budget-head">
           <span class="name">
             {{ c.name }}
@@ -135,12 +135,12 @@ async function save(c) {
               :title="`Ret budget for ${c.name}`"
               @click="edit(c)"
             >
-              {{ money(limitOf(c)) }} <span aria-hidden="true">✎</span>
+              {{ money(limitOf(c)) }}
             </button>
           </span>
         </div>
         <div class="track">
-          <span class="fill" :class="{ over: c.projected > limitOf(c) }" :style="{ width: pct(c.monthToDate, c) + '%' }"></span>
+          <span class="fill" :class="{ over: c.monthToDate > limitOf(c) }" :style="{ width: pct(c.monthToDate, c) + '%' }"></span>
           <span class="avg" :style="{ left: pct(c.avgMonthly, c) + '%' }" :title="`Gennemsnit ${money(c.avgMonthly)}`"></span>
           <span
             :class="['limit', { dragging: drag?.id === c.id }]"

@@ -2,8 +2,7 @@
 // so `act()` just swaps it in. Components read `store.data` and call `act(api.x(...))`.
 import { reactive } from 'vue';
 
-// flash: ids of budgets the rådgiver just changed, so the Budgetter panel can highlight them.
-export const store = reactive({ data: null, error: '', busy: false, flash: new Set() });
+export const store = reactive({ data: null, error: '', busy: false });
 
 export async function act(promise) {
   store.busy = true;

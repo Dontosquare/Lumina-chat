@@ -118,7 +118,7 @@ function toggle(id) {
           <span v-if="s.confidence === 'medium'" class="badge warn" title="Kræver en lille ændring i dine vaner">kræver nye vaner</span>
         </div>
         <h4>{{ s.title }}</h4>
-        <p class="impact">→ {{ s.impact }}</p>
+        <p class="impact">{{ s.impact }}</p>
 
         <ul v-if="s.moves" class="moves">
           <li v-for="m in s.moves" :key="m.label">
@@ -131,7 +131,7 @@ function toggle(id) {
           <div v-if="s.status === 'pending'" class="actions">
             <button class="primary small" :disabled="store.busy" @click="act(api.dismiss(s.id))">Forstået</button>
           </div>
-          <p v-else class="status">✓ Forstået</p>
+          <p v-else class="status">Forstået</p>
         </template>
         <template v-else>
           <button class="link" @click="toggle(s.id)">{{ expanded.has(s.id) ? 'Skjul begrundelse' : 'Hvorfor?' }}</button>
@@ -141,7 +141,7 @@ function toggle(id) {
             <button class="primary small" :disabled="store.busy" @click="act(api.apply(s.id))">Acceptér</button>
             <button class="ghost small" :disabled="store.busy" @click="act(api.dismiss(s.id))">Afvis</button>
           </div>
-          <p v-else class="status">{{ s.status === 'applied' ? '✓ Accepteret' : 'Afvist' }}</p>
+          <p v-else class="status">{{ s.status === 'applied' ? 'Accepteret' : 'Afvist' }}</p>
         </template>
       </article>
     </div>

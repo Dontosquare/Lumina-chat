@@ -4,7 +4,6 @@ import { store, act } from './store.js';
 import { api } from './api.js';
 import OverviewCards from './components/OverviewCards.vue';
 import AgentPanel from './components/AgentPanel.vue';
-import ChatPanel from './components/ChatPanel.vue';
 import GoalsPanel from './components/GoalsPanel.vue';
 import BudgetsPanel from './components/BudgetsPanel.vue';
 import TransactionsPanel from './components/TransactionsPanel.vue';
@@ -47,7 +46,7 @@ onMounted(() => act(api.state()));
     </div>
     <div class="header-actions">
       <button class="ghost" :aria-label="theme === 'light' ? 'Skift til mørk tilstand' : 'Skift til lys tilstand'" @click="theme = theme === 'light' ? 'dark' : 'light'">
-        {{ theme === 'light' ? '☾ Mørk' : '☀ Lys' }}
+        {{ theme === 'light' ? 'Mørkt tema' : 'Lyst tema' }}
       </button>
       <button
         class="ghost"
@@ -74,7 +73,6 @@ onMounted(() => act(api.state()));
         <TransactionsPanel />
       </div>
       <aside class="col agent-col">
-        <ChatPanel />
         <AgentPanel />
       </aside>
     </div>
