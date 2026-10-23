@@ -5,9 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { load, save, reset, clear } from './store.js';
 import { snapshot, toISODate } from './finance.js';
 import { runAgent, applySuggestion, MODES } from './agent.js';
+import { previewImport } from './csv.js';
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '5mb' })); // room for a year of bank statement CSV
 
 const PORT = process.env.PORT || 3001;
 const wrap = (fn) => (req, res) => fn(req, res).catch((err) => res.status(err.status || 500).json({ error: err.message }));
@@ -33,15 +34,44 @@ app.patch('/api/income', wrap(async (req, res) => {
   res.json(await state());
 }));
 
-app.post('/api/transactions', wrap(async (req, res) => {
-  const db = await load();
-  const { category, note = '' } = req.body;
-  const amount = Number(req.body.amount);
-  const date = req.body.date || toISODate(new Date());
+function toTransaction(db, { category, note = '', ...body }, id) {
+  const amount = Number(body.amount);
+  const date = body.date || toISODate(new Date());
   if (!db.budgets.some((b) => b.id === category)) throw fail(400, 'Ukendt kategori');
   if (!Number.isFinite(amount) || amount <= 0) throw fail(400, 'Beløbet skal være større end 0');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw fail(400, 'Datoen skal have formatet ÅÅÅÅ-MM-DD');
-  db.transactions.unshift({ id: `t${Date.now()}`, date, category, amount: Math.round(amount * 100) / 100, note: String(note).slice(0, 80) });
+  return { id, date, category, amount: Math.round(amount * 100) / 100, note: String(note).slice(0, 80) };
+}
+
+app.post('/api/transactions', wrap(async (req, res) => {
+  const db = await load();
+  db.transactions.unshift(toTransaction(db, req.body, `t${Date.now()}`));
+  db.transactions.sort((a, b) => b.date.localeCompare(a.date));
+  await save();
+  res.json(await state());
+}));
+
+// CSV import in two steps: preview (nothing is saved) and import of the rows you kept.
+app.post('/api/import/preview', wrap(async (req, res) => {
+  const db = await load();
+  const m = req.body.mapping;
+  const mapping = m && ['date', 'amount', 'text'].every((k) => Number.isInteger(m[k])) ? m : undefined;
+  try {
+    res.json(previewImport(req.body.text, db, mapping));
+  } catch (err) {
+    throw fail(400, err.message);
+  }
+}));
+
+app.post('/api/import', wrap(async (req, res) => {
+  const db = await load();
+  const rows = Array.isArray(req.body.rows) ? req.body.rows : [];
+  if (!rows.length) throw fail(400, 'Vælg mindst én postering');
+  if (rows.length > 5000) throw fail(400, 'Højst 5000 posteringer ad gangen');
+  const stamp = Date.now();
+  // Validate every row before saving any, so a bad row never leaves half an import behind.
+  const added = rows.map((r, i) => toTransaction(db, r, `t${stamp}-${i}`));
+  db.transactions.push(...added);
   db.transactions.sort((a, b) => b.date.localeCompare(a.date));
   await save();
   res.json(await state());
